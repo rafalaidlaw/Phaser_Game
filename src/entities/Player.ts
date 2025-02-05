@@ -30,6 +30,15 @@ export class Player extends Phaser.Physics.Arcade.Sprite {
                 if (isSpaceJustDown && onFloor) {
                   this.setVelocityY(-1600);
                 }
+                if (!(this.scene as any).isGameRunning) {
+                  return;
+                }
+                if (!onFloor) {
+                  this.anims.stop();
+                  this.setTexture("dino-run", 0);
+                } else {
+                  this.playRunAnimation();
+                }
               }
 
               playRunAnimation() {
