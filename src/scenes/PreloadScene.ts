@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { PRELOAD_CONFIG } from "..";
 
 class PreloadScene extends Phaser.Scene {
         constructor() {
@@ -12,6 +13,10 @@ class PreloadScene extends Phaser.Scene {
                         frameWidth: 88,
                         frameHeight: 94
                       });
+                      for (let i = 0; i < PRELOAD_CONFIG.cactusesCount; i++) {
+                        const cactusNum = i + 1;
+                        this.load.image(`obstacle-${cactusNum}`, `assets/cactuses_${cactusNum}.png`);
+                      }
         }
         create() {
                 this.scene.start("PlayScene");
