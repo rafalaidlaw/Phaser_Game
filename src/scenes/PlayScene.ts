@@ -14,7 +14,7 @@ class PlayScene extends GameScene {
         startTrigger: SpriteWithDynamicBody;
         spawnInterval: number = 1500;
         spawnTime: number = 0;
-        obstacleSpeed: number = 5;
+        gameSpeed: number = 5;
 
         
 
@@ -27,7 +27,14 @@ class PlayScene extends GameScene {
                 this.createEnviornment();
                 this.createPlayer();
                 this.obstacles = this.physics.add.group();
+
                 this.startTrigger = this.physics.add.sprite(0, 30, null).setOrigin(0, 1).setAlpha(0);
+
+                this.physics.add.collider(this.obstacles, this.player, () => {
+                        this.physics.pause();
+                        this.isGameRunning = false;
+                      });
+
                 this.physics.add.overlap(this.startTrigger, this.player, () => {
                         if (this.startTrigger.y === 30) {
                                 this.startTrigger.body.reset(0, this.gameHeight);
@@ -60,13 +67,15 @@ class PlayScene extends GameScene {
                   this.spawnObstacle();
                   this.spawnTime = 0;
                 }
-                Phaser.Actions.IncX(this.obstacles.getChildren(), -this.obstacleSpeed);
+                Phaser.Actions.IncX(this.obstacles.getChildren(), -this.gameSpeed);
 
                 this.obstacles.getChildren().forEach((obstacle: SpriteWithDynamicBody) => {
                         if (obstacle.getBounds().right < 0) {
                           this.obstacles.remove(obstacle);
                         }
                       });
+                      
+                      this.ground.tilePositionX += this.gameSpeed;
               }
 
         createPlayer(){
@@ -87,7 +96,8 @@ class PlayScene extends GameScene {
                 
                 this.obstacles
                  .create(distance, this.gameHeight, `obstacle-${obstacleNum}`)
-                 .setOrigin(0, 1);
+                 .setOrigin(0, 1)
+                 .setImmovable();
     
         }
 
