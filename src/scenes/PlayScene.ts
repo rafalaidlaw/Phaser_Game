@@ -17,7 +17,8 @@ class PlayScene extends GameScene {
         restartText: Phaser.GameObjects.Image;
         spawnInterval: number = 1500;
         spawnTime: number = 0;
-        gameSpeed: number = 5;
+        gameSpeed: number = 8;
+        
 
         constructor() {
                 super("PlayScene"); 
@@ -31,19 +32,7 @@ class PlayScene extends GameScene {
                 this.handleGameStart();
                 this.handleObstacleCollisions();
                 this.handleGameRestart();
-
-
-
-                
-
-                
-
-                
-
-                
-
-                
-
+                this.createAnimations();
                 
         }
         update(time: number, delta: number): void {
@@ -89,14 +78,32 @@ class PlayScene extends GameScene {
                 .setAlpha(0);
 
         }
+
+        createAnimations() {
+                this.anims.create({
+                  key: "enemy-bird-fly",
+                  frames: this.anims.generateFrameNumbers("enemy-bird"),
+                  frameRate: 6,
+                  repeat: -1
+                });
+              }
         
 
         spawnObstacle() {
-                const obstacleNum = Math.floor(Math.random() * PRELOAD_CONFIG.cactusesCount) + 1;
-                const distance = Phaser.Math.Between(600, 900);
                 
-                this.obstacles
-                 .create(distance, this.gameHeight, `obstacle-${obstacleNum}`)
+                const obstacleNum = Math.floor(Math.random() * (PRELOAD_CONFIG.cactusesCount + PRELOAD_CONFIG.birdsCount)) + 1;
+                const distance = Phaser.Math.Between(150, 300);
+                let obstacle;
+                if (obstacleNum > PRELOAD_CONFIG.cactusesCount) {
+                  const enemyPossibleHeight = [20, 70];
+                  const enemyHeight = enemyPossibleHeight[Math.floor(Math.random() * 2)]
+                  obstacle = this.obstacles.create(this.gameWidth + distance, this.gameHeight - enemyHeight, `enemy-bird`)
+      obstacle.play("enemy-bird-fly", true);
+                } else {
+                  obstacle = this.obstacles.create(this.gameWidth + distance, this.gameHeight, `obstacle-${obstacleNum}`)
+                }
+                
+                obstacle
                  .setOrigin(0, 1)
                  .setImmovable();
     
@@ -134,6 +141,7 @@ class PlayScene extends GameScene {
                         
                         this.isGameRunning = false;
                         this.physics.pause();
+                        this.anims.pauseAll();
                         this.player.die();
                         this.gameOverContainer.setAlpha(1);
                         this.spawnTime = 0;
@@ -145,7 +153,12 @@ class PlayScene extends GameScene {
         handleGameRestart(){
                 this.restartText.on("pointerdown", () =>
                         {
-                                console.log("Clicker")
+                                this.physics.resume();
+                                this.player.setVelocityY(0);
+                                this.obstacles.clear(true, true);
+                                this.gameOverContainer.setAlpha(0);
+                                this.anims.resumeAll();
+                                this.isGameRunning = true;
                         })
 
         }
