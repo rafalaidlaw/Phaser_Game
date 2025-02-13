@@ -11,13 +11,22 @@ class PlayScene extends GameScene {
         player: Player;
         ground: Phaser.GameObjects.TileSprite;
         obstacles: Phaser.Physics.Arcade.Group;
+        clouds: Phaser.GameObjects.Group;
         startTrigger: SpriteWithDynamicBody;
+
+        score: number = 0;
+        scoreInterval: number = 100;
+        scoreDetlaTime: number = 0;
+
+        scoreText: Phaser.GameObjects.Text;
         gameOverContainer: Phaser.GameObjects.Container;
         gameOverText: Phaser.GameObjects.Image;
         restartText: Phaser.GameObjects.Image;
+
         spawnInterval: number = 1500;
         spawnTime: number = 0;
         gameSpeed: number = 8;
+        
         
 
         constructor() {
@@ -33,23 +42,42 @@ class PlayScene extends GameScene {
                 this.handleObstacleCollisions();
                 this.handleGameRestart();
                 this.createAnimations();
+                this.createScore();
                 
         }
         update(time: number, delta: number): void {
                 if (!this.isGameRunning) { return; }
                 this.spawnTime += delta;
+                this.scoreDetlaTime += delta;
+
+                if(this.scoreDetlaTime >= this.scoreInterval){
+                        this.score++;
+                        this.scoreDetlaTime = 0;
+                }
 
                 if (this.spawnTime >= this.spawnInterval) {
                   this.spawnObstacle();
                   this.spawnTime = 0;
                 }
                 Phaser.Actions.IncX(this.obstacles.getChildren(), -this.gameSpeed);
+                Phaser.Actions.IncX(this.clouds.getChildren(), -0.5);
+
+                const score = Array.from(String(this.score), Number);
+                for (let i = 0; i < 5 - String(this.score).length; i++) {
+                        score.unshift(0);
+                }
+                this.scoreText.setText(score.join(""));
 
                 this.obstacles.getChildren().forEach((obstacle: SpriteWithDynamicBody) => {
                         if (obstacle.getBounds().right < 0) {
                           this.obstacles.remove(obstacle);
                         }
                       });
+                this.clouds.getChildren().forEach((cloud: SpriteWithDynamicBody) => {
+                if (cloud.getBounds().right < 0) {
+                        cloud.x = this.gameWidth + 30;
+                }
+                });
                       
                       this.ground.tilePositionX += this.gameSpeed;
               }
@@ -63,6 +91,16 @@ class PlayScene extends GameScene {
                 this.ground = this.add
                 .tileSprite(0, this.gameHeight, 88, 26, "ground")
                 .setOrigin(0,1)
+
+                this.clouds = this.add.group();
+                this.clouds = this.clouds.addMultiple([
+                this.add.image(this.gameWidth / 2, 100, "cloud"),
+                this.add.image(this.gameWidth - 80, 80, "cloud"),
+                this.add.image(this.gameWidth / 1.3, 170, "cloud"),
+                this.add.image(100, 120, "cloud"),
+                this.add.image(300, 230, "cloud"),
+        ]);
+                this.clouds.setAlpha(0);
 
         }
         createObstacles(){
@@ -87,6 +125,15 @@ class PlayScene extends GameScene {
                   repeat: -1
                 });
               }
+
+              createScore() {
+                this.scoreText = this.add.text(this.gameWidth - 10, 5, "00000", {
+                  fontSize: 30,
+                  fontFamily: "Arial",
+                  color: "#535353",
+                  resolution: 5
+                }).setOrigin(1, 0).setAlpha(0);
+              }
         
 
         spawnObstacle() {
@@ -110,6 +157,7 @@ class PlayScene extends GameScene {
         }
 
         handleGameStart(){
+                
                 this.startTrigger = this.physics.add.sprite(0, 30, null).setOrigin(0, 1).setAlpha(0);
                 this.physics.add.overlap(this.startTrigger, this.player, () => {
                         if (this.startTrigger.y === 30) {
@@ -122,6 +170,7 @@ class PlayScene extends GameScene {
                                 delay: 1000 / 60,
                                 loop: true,
                                 callback: () => {
+                                        
                                         this.player.playRunAnimation();
                                         this.player.setVelocityX(80);
                                         this.ground.width += (17 * 2);
@@ -130,6 +179,8 @@ class PlayScene extends GameScene {
                                           this.ground.width = this.gameWidth;
                                           this.player.setVelocityX(0);
                                           this.isGameRunning = true;
+                                          this.clouds.setAlpha(1);
+                                          this.scoreText.setAlpha(1);
                                   }
                                 }
                               });                    
@@ -145,7 +196,9 @@ class PlayScene extends GameScene {
                         this.player.die();
                         this.gameOverContainer.setAlpha(1);
                         this.spawnTime = 0;
-                        this.gameSpeed = 5;
+                        this.scoreDetlaTime = 0;
+                        this.score = 0;
+                        
                         
                       });
 
@@ -158,6 +211,7 @@ class PlayScene extends GameScene {
                                 this.obstacles.clear(true, true);
                                 this.gameOverContainer.setAlpha(0);
                                 this.anims.resumeAll();
+                                
                                 this.isGameRunning = true;
                         })
 
