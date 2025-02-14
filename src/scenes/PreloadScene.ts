@@ -13,6 +13,10 @@ class PreloadScene extends Phaser.Scene {
                 this.load.image("game-over", "assets/game-over.png");
                 this.load.image("cloud", "assets/cloud.png");
 
+                this.load.audio("jump", "assets/jump.m4a");
+                this.load.audio("hit", "assets/hit.m4a");
+                this.load.audio("progress", "assets/reach.m4a");
+
                 this.load.spritesheet("dino-run", "assets/dino-run.png", {
                         frameWidth: 88,
                         frameHeight: 94
