@@ -25,7 +25,8 @@ class PlayScene extends GameScene {
 
         spawnInterval: number = 1500;
         spawnTime: number = 0;
-        gameSpeed: number = 8;
+        gameSpeed: number = 7;
+        gameSpeedModifier: number = 1;
         
         
 
@@ -55,11 +56,15 @@ class PlayScene extends GameScene {
                         this.scoreDetlaTime = 0;
                 }
 
+                if (this.score % 10 === 0) {
+                        this.gameSpeedModifier += 0.01;
+                      }
+
                 if (this.spawnTime >= this.spawnInterval) {
                   this.spawnObstacle();
                   this.spawnTime = 0;
                 }
-                Phaser.Actions.IncX(this.obstacles.getChildren(), -this.gameSpeed);
+                Phaser.Actions.IncX(this.obstacles.getChildren(), -this.gameSpeed * this.gameSpeedModifier);
                 Phaser.Actions.IncX(this.clouds.getChildren(), -0.5);
 
                 const score = Array.from(String(this.score), Number);
@@ -79,7 +84,7 @@ class PlayScene extends GameScene {
                 }
                 });
                       
-                      this.ground.tilePositionX += this.gameSpeed;
+                         this.ground.tilePositionX += (this.gameSpeed * this.gameSpeedModifier);
               }
 
         createPlayer(){
@@ -211,7 +216,7 @@ class PlayScene extends GameScene {
                                 this.obstacles.clear(true, true);
                                 this.gameOverContainer.setAlpha(0);
                                 this.anims.resumeAll();
-                                
+                                this.gameSpeedModifier = 1;
                                 this.isGameRunning = true;
                         })
 
