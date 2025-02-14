@@ -13,11 +13,13 @@ class PlayScene extends GameScene {
         obstacles: Phaser.Physics.Arcade.Group;
         clouds: Phaser.GameObjects.Group;
         startTrigger: SpriteWithDynamicBody;
+       
 
         score: number = 0;
         scoreInterval: number = 100;
         scoreDetlaTime: number = 0;
 
+        highScoreText: Phaser.GameObjects.Text;
         scoreText: Phaser.GameObjects.Text;
         gameOverContainer: Phaser.GameObjects.Container;
         gameOverText: Phaser.GameObjects.Image;
@@ -58,6 +60,19 @@ class PlayScene extends GameScene {
 
                 if (this.score % 10 === 0) {
                         this.gameSpeedModifier += 0.01;
+                        
+                      }
+                      if (this.score % 100 === 0 && this.score != 0) {
+                        this.tweens.add({
+                                targets: this.scoreText,
+                                duration: 100,
+                                repeat: 3,
+                                alpha: 0,
+                                yoyo: true
+                              });
+                      }
+                      if (this.score % 6 === 0 || this.score === 0) {
+                        this.scoreText.alpha = 1;
                       }
 
                 if (this.spawnTime >= this.spawnInterval) {
@@ -138,7 +153,16 @@ class PlayScene extends GameScene {
                   color: "#535353",
                   resolution: 5
                 }).setOrigin(1, 0).setAlpha(0);
+
+                this.highScoreText = this.add.text(this.scoreText.getBounds().left - 20, this.scoreText.y, "00000", {
+                        fontSize: 30,
+                        fontFamily: "Arial",
+                        color: "#535353",
+                        resolution: 5
+                      }).setOrigin(1, 0).setAlpha(0);
+                
               }
+              
         
 
         spawnObstacle() {
@@ -203,6 +227,11 @@ class PlayScene extends GameScene {
                         this.spawnTime = 0;
                         this.scoreDetlaTime = 0;
                         this.score = 0;
+
+                        const newHighScore = this.highScoreText.text.substring(this.highScoreText.text.length - 5);
+                        const newScore = Number(this.scoreText.text) > Number(newHighScore) ? this.scoreText.text : newHighScore;
+                        this.highScoreText.setText("HI " + newScore);
+                        this.highScoreText.setAlpha(1);
                         
                         
                       });
